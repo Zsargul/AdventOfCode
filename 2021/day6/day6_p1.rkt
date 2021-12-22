@@ -6,6 +6,8 @@
 ;; Call: (length (day6 fishlist 81))
 ;; Result: 353079
 
+;; I didn't know how to optimise the second part of the problem in racket, so I didn't write that part of day6
+
 (define fishlist
    (file->list "input.txt")
   )
