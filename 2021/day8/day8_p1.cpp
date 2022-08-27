@@ -3,6 +3,8 @@
 #include <string>
 #include <string.h>
 #include <vector>
+#include <sstream>
+#include <algorithm>
 
 /*
  * 1	-	2 segments *
@@ -64,5 +66,33 @@ int main() {
 	}
 	*/
 
+	std::vector<std::string> digitVector;
+	std::string tmp;
+	for (int j = 0; j < length; j++) {
+		std::string s = outputVector[j];
+		std::stringstream ss(s);
+		while(std::getline(ss, tmp, ' ')) {
+			digitVector.push_back(tmp);
+		}
+	}
+	
+	// Strip empty spaces
+	std::string ws = "";
+	digitVector.erase(std::remove(digitVector.begin(), digitVector.end(), ws), digitVector.end());
 
+	int l;
+	int count;
+	for (auto digit : digitVector) {
+	 	l = digit.length();
+		
+		/*
+		 * One : 2
+		 * Four : 4
+		 * Seven : 3
+		 * Eight : 7
+		 */
+		if (l == 2 || l == 4 || l == 3 || l == 7) 
+			count++;
+	}
+	std::cout << count << std::endl;
 }
