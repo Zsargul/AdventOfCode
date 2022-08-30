@@ -4,19 +4,17 @@
 #include <vector>
 
 // Macros for brevity in some function calls/declarations
-#define SCANNED_VECTOR 	std::vector< std::vector<int> > &scanned 
+#define SCANNED_VECTOR  std::vector< std::vector<int> > &scanned 
 #define LAVAMAP 	std::vector< std::vector<int> > &lavaMap
 
 const int invalid = -1; // Assigned to an adjacent position when said position does not exist
 const int alreadyScanned = 1; // For marking scanned coordinates
 
 bool isCenterLowest(int center, int up, int down, int left, int right);
-void markScanned(std::vector< std::vector<int> > &scanned, int y, int x);
-int scanUp(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x);
-int scanRight(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x);
-int scanDown(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x);
-int scanLeft(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x);
-int startScan(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x);
+void markScanned(SCANNED_VECTOR, int y, int x);
+int isScanned(SCANNED_VECTOR, int y, int x);
+int scan(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x);
+int coordExists(const int vert_length, const int horiz_length, int y, int x);
 
 int main() {
 
@@ -113,34 +111,79 @@ int main() {
 	// Vector for holding basin sizes
 	std::vector<int> basins;
 
+	// Scan every basin and it's size
 	for(int y = 0; y < vert_length; y++) {
 		for(int x = 0; x < horiz_length; x++) {
-			// Begin basin scanning here
+			int basinSize = scan(vert_length, horiz_length, scanned, lavaMap, y, x);
+			if (basinSize == 0) {
+				continue;
+			} else {
+				basins.push_back(basinSize);
+			}
 		}
 	}
+
+	// Find 3 largest basins
+	int topThree[3] = {0};
+	for (int i = 0; i < basins.size(); i++) {
+		int size = basins[i];
+		if (size > topThree[0]) {
+			topThree[2] = topThree[1];
+			topThree[1] = topThree[0];
+			topThree[0] = size;
+		} else if (size > topThree[1]) {
+			topThree[2] = topThree[1];
+			topThree[1] = size;
+		} else if (size > topThree[2]) {
+			topThree[2] = size;
+		}
+	}
+
+	int product = 1;
+	for (int i = 0; i < 3; i++) {
+		product *= topThree[i];
+	}
+	std::cout << product << std::endl;
 
 	return 0;
 }
 
 
 // Remember to pass in scanned vector by reference in all scan-related functions
-int startScan(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x) {
+int scan(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x) {
+	// Check if coordinate exists
+	if (!coordExists(vert_length, horiz_length, y, x)) {	
+		return 0;
+	} else if (isScanned(scanned, y, x) || lavaMap[y][x] == 9) {
+		return 0; // Coordinate is already scanned, is equal to 9
+	}
 
+	int scanReturn = 1;
+	markScanned(scanned, y, x);
+	
+	scanReturn += scan(vert_length, horiz_length, scanned, lavaMap, y-1, x); // Up
+	scanReturn += scan(vert_length, horiz_length, scanned, lavaMap, y, x+1); // Right
+	scanReturn += scan(vert_length, horiz_length, scanned, lavaMap, y+1, x); // Down
+	scanReturn += scan(vert_length, horiz_length, scanned, lavaMap, y, x-1); // :eft
+	return scanReturn;
 }
 
-int scanUp(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x) {
+int coordExists(const int vert_length, const int horiz_length, int y, int x) {
+	if (y < 0 || y >= vert_length || x < 0 || x >= horiz_length) {
+		return 0; // Doesn't exist
+	} else {
+		return 1; // Exists
+	}
 }
 
-int scanRight(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x) {
+int isScanned(SCANNED_VECTOR, int y, int x) {
+	if (scanned[y][x] == 1)
+		return 1;
+	else
+		return 0;
 }
 
-int scanDown(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x) {
-}
-
-int scanLeft(const int vert_length, const int horiz_length, SCANNED_VECTOR, LAVAMAP, int y, int x) {
-}
-
-void markScanned(std::vector< std::vector<int> > &scanned, int y, int x) {
+void markScanned(SCANNED_VECTOR, int y, int x) {
 	scanned[y][x] = alreadyScanned;
 }
 
@@ -154,6 +197,5 @@ bool isCenterLowest(int center, int up, int down, int left, int right) {
 			return false;
 		}
 	}
-
 	return true;
 }
