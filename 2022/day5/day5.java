@@ -51,7 +51,7 @@ class Day5 {
 		int stackCount = getNumStacks("input.txt");
 		ArrayList<Stack<Character>> stacks = new ArrayList<Stack<Character>>();
 
-		// Populate stacks with empty stacks
+		// Populate stacks arrayList with empty stacks
 		for (int i = 0; i < stackCount; i++) {
 			Stack<Character> s = new Stack<Character>();
 			stacks.add(s);	
@@ -61,20 +61,21 @@ class Day5 {
 		ArrayList<String> stackSection = getStackSection("input.txt");
 		int stackLineLength = (stackCount * 3) + (stackCount - 1);
 
+		// Populate the stacks arrayList with the extracted values
 		for (int j = stackSection.size()-1; j >= 0; j--) {
 			String line = stackSection.get(j);
 			int stackNum = 1;
 			for (int i = 1; i < stackLineLength; i+=4) {
 				char c = line.charAt(i);
-				System.out.println(c);
 				if (c == ' ') {
 					stackNum++;
-					break;
+					continue;
 				}
 				stacks.get(stackNum-1).push(c);
 				stackNum++;
 			}
 		}
+
 
 		for (int i = 0; i < stacks.size(); i++) {
 			System.out.println(stacks.get(i).toString());
