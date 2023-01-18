@@ -26,41 +26,72 @@ class Day7 {
 
 		String l = "";
 		String cmd = "";
-		String curDir = "";
-		String prevDir = "";
-		for (int i = 0; i < lines.size(); i++) {
+		String temp = "";
+		boolean listMode = false;
+
+		Stack<String> dirDepth = new Stack<String>();
+		dirDict.put("/", 0);
+		dirDepth.push("/");
+		for (int i = 1; i < lines.size(); i++) {
 			l = lines.get(i);
 			String[] parts = l.split(" ");
 
+			System.out.print(l+"        ");
 			if (isCommand(l)) {
 				cmd = parts[1];
 				switch (cmd) {
 					// Change Directory
 					case "cd":
+						listMode = false;
 						if (parts[2].equals("..")) { 
-							curDir = prevDir;
-						} else {
-							prevDir = curDir;
-							curDir = parts[2];
+							temp = dirDepth.pop();
 
+							System.out.println("[Curr]: "+dirDepth.peek()+" | [Prev]: "+temp);
+							dirDict.put(dirDepth.peek(), dirDict.get(dirDepth.peek())+dirDict.get(temp));
+						} else {
+							System.out.println("[Curr]: "+parts[2]+" | [Prev]: "+dirDepth.peek());
 							if (!dirDict.containsKey(parts[2])) { // Directory has not yet been encountered
 								dirDict.put(parts[2], 0);
 							}
+
+							dirDepth.push(parts[2]);
 						}
 						break;
 
 					// List Directory Contents
 					case "ls":
-
-						break;
+						System.out.println("");
+						listMode = true;
+						continue;
 
 					// Unknown Command
 					default:
 						throw new IllegalArgumentException("Error: Unknown command encountered. Ending file system scan.");
 				}
-			} else {
-					
+			} else if (listMode) {
+				System.out.println("");
+				if (parts[0].equals("dir")) {
+					// Add directory if has not yet been encountered
+					if (!dirDict.containsKey(parts[1])) {
+						dirDict.put(parts[1], 0);
+					} 
+				} else {
+					dirDict.put(dirDepth.peek(), dirDict.get(dirDepth.peek())+Integer.parseInt(parts[0]));
+				}
 			}
 		}
+		while (dirDepth.peek() != "/") {
+			temp = dirDepth.pop();
+
+			dirDict.put(dirDepth.peek(), dirDict.get(dirDepth.peek())+dirDict.get(temp));
+		}
+
+		int sum = 0;
+		Set<String> keys = dirDict.keySet();
+		for (String key : keys) {
+			System.out.println(key + " (Size: " + dirDict.get(key)+")");
+			if (dirDict.get(key) <= maxSize) sum += dirDict.get(key);
+		}
+		System.out.println(sum);
 	}
 }
