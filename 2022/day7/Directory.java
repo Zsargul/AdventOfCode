@@ -1,4 +1,6 @@
-class Directory {
+import java.util.*;
+
+public class Directory {
 	private int size;
 	private final String name;
 	private final Directory parentDirectory;
@@ -7,10 +9,14 @@ class Directory {
 
 	// Getters
 	public int getSize() {
-		return this.size();
+		int s = this.size;
+		for (Directory d : this.getChildren()) {
+			s += d.getSize();
+		}
+		return s;
 	}
 	public String getName() {
-		return this.name();
+		return this.name;
 	}
 	public Directory getParent() {
 		return this.parentDirectory;
@@ -33,21 +39,32 @@ class Directory {
 	}
 	public void addChild(Object child) {
 		if ( !(child instanceof Directory) ) throw new IllegalArgumentException("Directory.addChild(): Child object is not of Directory type.");
-		if (child.isNull()) throw new IllegalArgumentException("Directory.addChild(): Child object is null.");
+		if (Objects.isNull(child)) throw new IllegalArgumentException("Directory.addChild(): Child object is null.");
 		this.childDirectories.add((Directory)child);	
 	}
 	public void addFile(Object file) {
 		if ( !(file instanceof File) ) throw new IllegalArgumentException("Directory.addFile(): File object is not of File type.");
-		if (file.isNull()) throw new IllegalArgumentException("Directory.addFile(): File object is null.");
+		if (Objects.isNull(file)) throw new IllegalArgumentException("Directory.addFile(): File object is null.");
 		this.files.add((File)file);
+		this.increaseSize(((File) file).getSize());
+	}
+
+	public void printTree() {
+		System.out.println("["+this.getName()+"]\n");
+		for (Directory c : this.getChildren()) {
+			c.printTree();
+		}
+		for (File f : this.getFiles()) {
+			f.printTree();
+		}
 	}
 
 	// Constructor
-	Directory(String name, int size, Directory parentDirectory) {
+	public Directory(String name, int size, Directory parentDirectory) {
 		// Validate variables
 		if (name.strip().equals("")) throw new IllegalArgumentException("Directory: Name cannot be empty.");
 		if (size != 0) throw new IllegalArgumentException("Directory: Size must be 0 when creating object");
-		if (parentDirectory.isNull() && !name.strip().equals("/")) throw new IllegalArgumentException("Directory: Only the root directory (/) can have no parent");
+		if (Objects.isNull(parentDirectory) && !name.strip().equals("/")) throw new IllegalArgumentException("Directory: Only the root directory (/) can have no parent");
 
 		this.name = name;
 		this.size = size;

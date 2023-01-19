@@ -1,7 +1,15 @@
 import java.io.*;
 import java.util.*;
 
-class Day7 {
+public class Day7 {
+	public static ArrayList<Directory> getDirectories(ArrayList<Directory> dirs, Directory d) {
+		dirs.add(d);
+		for (Directory c : d.getChildren()) {
+			dirs = getDirectories(dirs, c);
+		}
+		return dirs;
+	}
+
 	public static boolean isCommand(String s) {
 		return s.trim().startsWith("$") ? true : false;
 	}
@@ -14,7 +22,7 @@ class Day7 {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader("input.txt"));
 			String line = "";
-			while ((line = reader.readLine() != null) {
+			while ((line = reader.readLine()) != null) {
 				if (!line.equals("$ ls")) {
 					lines.add(line);
 				}
@@ -28,7 +36,7 @@ class Day7 {
 		ArrayList<Directory> directories = new ArrayList<Directory>();
 		Stack<Directory> directoryStack = new Stack<Directory>();
 
-		directories.add("/", 0, null);
+		directories.add(new Directory("/", 0, null));
 		directoryStack.push(directories.get(0));
 		Directory currentDirectory;
 
@@ -40,7 +48,6 @@ class Day7 {
 			if (isCommand(l)) {
 				if (parts[2].equals("..")) {
 					directoryStack.pop();
-					currentDirectory = directoryStack.peek();
 				} else {
 					for (Directory d : currentDirectory.getChildren()) {
 						if (parts[2].equals(d.getName())) {
@@ -52,13 +59,34 @@ class Day7 {
 				}
 			} else {
 				if (parts[0].equals("dir")) {
-					parentDir.addChild(new Directory(parts[1], 0, currentDirectory));
+					currentDirectory.addChild(new Directory(parts[1], 0, currentDirectory));
 				} else {
 					fileSize = Integer.parseInt(parts[0]);
 					fileName = parts[1];
-					parentDir.addChild(new File(fileName, fileSize, currentDirectory));
+					currentDirectory.addFile(new File(fileName, fileSize, currentDirectory));
 				}
 			}
 		}
+
+		int sum = 0;
+		if (!directories.get(0).getName().equals("/")) {
+			throw new RuntimeException("Error: Root directory ('/') is not at the start of directories ArrayList!");
+		} else {
+			ArrayList<Directory> dirs = new ArrayList<Directory>();
+			dirs = getDirectories(dirs, directories.get(0));
+			for (Directory d : dirs) {
+				if (d.getSize() <= 100000) {
+					sum += d.getSize();
+				}
+			}
+			/*
+			for (Directory d : dirs) {
+				System.out.println("["+d.getName()+"]\t["+d.getSize()+"]");
+			}
+			*/
+		}
+		System.out.println(sum);
+
+
 	}
 }
