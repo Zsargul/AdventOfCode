@@ -68,25 +68,33 @@ public class Day7 {
 			}
 		}
 
+		ArrayList<Directory> dirs = new ArrayList<Directory>();
 		int sum = 0;
 		if (!directories.get(0).getName().equals("/")) {
 			throw new RuntimeException("Error: Root directory ('/') is not at the start of directories ArrayList!");
 		} else {
-			ArrayList<Directory> dirs = new ArrayList<Directory>();
 			dirs = getDirectories(dirs, directories.get(0));
 			for (Directory d : dirs) {
 				if (d.getSize() <= 100000) {
 					sum += d.getSize();
 				}
 			}
-			/*
-			for (Directory d : dirs) {
-				System.out.println("["+d.getName()+"]\t["+d.getSize()+"]");
-			}
-			*/
 		}
-		System.out.println(sum);
+		System.out.println(sum); // Part 1
+								 
+		int totalSpace = 70000000;
+		int spaceNeededForUpdate = 30000000;
 
+		int freeSpace = totalSpace - directories.get(0).getSize();
+		int neededFreeSpace = spaceNeededForUpdate - freeSpace;
+
+		Directory toDelete = dirs.get(0);
+		for (Directory d : dirs) {
+			if (d.getSize() < neededFreeSpace) continue;
+			
+			if (d.getSize() < toDelete.getSize()) toDelete = d;
+		}
+		System.out.println(toDelete.getSize());
 
 	}
 }
